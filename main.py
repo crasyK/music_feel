@@ -1,54 +1,27 @@
 import cv2
 from deepface import DeepFace
 import time
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+import webbrowser
 
 from dotenv import load_dotenv
+from googleapiclient.discovery import build
+import webbrowser
 import os
+
+def youtube_api_search(api_key, query):
+    youtube = build('youtube', 'v3', developerKey=api_key)
+    request = youtube.search().list(q=query, part='id,snippet', maxResults=1)
+    response = request.execute()
+    return response['items'][0]['id']['videoId']
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Retrieve Spotify credentials from environment variables
-client_id = os.getenv("SPOTIFY_CLIENT_ID")
-client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
-redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI")
-
-# Spotify API stuff
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=client_id,
-    client_secret=client_secret,
-    redirect_uri=redirect_uri,
-    scope="user-library-read,user-modify-playback-state,user-read-playback-state,user-read-currently-playing"
-))
-
-def search_and_play_track(track_name, artist_name=None):
-    query = f"track:{track_name}"
-    if artist_name:
-        query += f" artist:{artist_name}"
-    
-    results = sp.search(q=query, type="track", limit=1)
-    
-    if not results['tracks']['items']:
-        print("No tracks found")
-        return
-    
-    track_uri = results['tracks']['items'][0]['uri']
-    
-    # Get available devices
-    devices = sp.devices()
-    if not devices['devices']:
-        print("No active devices found. Please open Spotify on one of your devices.")
-        return
-    
-    # Play the track on the first available device
-    sp.start_playback(device_id=devices['devices'][0]['id'], uris=[track_uri])
-    print(f"Now playing: {results['tracks']['items'][0]['name']}")
-
-
-search_and_play_track("Fanfare to Success")
-
+# Usage
+# Load your YouTube API key from .env file
+API_KEY = os.getenv("YOUTUBE_API_KEY")
+video_id = youtube_api_search(API_KEY, "Sweet Child O Mine Guns N Roses")
+webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
 # Initialize camera
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
 
