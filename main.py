@@ -20,8 +20,12 @@ load_dotenv()
 # Usage
 # Load your YouTube API key from .env file
 API_KEY = os.getenv("YOUTUBE_API_KEY")
-video_id = youtube_api_search(API_KEY, "Sweet Child O Mine Guns N Roses")
-webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+
+# Example usage of the youtube_api function
+#video_id = youtube_api_search(API_KEY, "Sweet Child O Mine Guns N Roses")
+#webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+
+
 # Initialize camera
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
 
@@ -34,6 +38,9 @@ global start_time
 start_time = time.time()
 
 last_time = time.time()
+
+counter_every = 3
+last_emotion = 'neutral'
 
 def get_emotion_duration(a,b,emotion_changes):
     """
@@ -109,18 +116,41 @@ while True:
                 # Record the time of the change
             emotion_changes.update({time.time():dominant_emotion})
         emotion_distribution_overall =  get_emotion_duration(start_time, time.time(),emotion_changes)   
+        
+        # ---- Notes ----
         # Two Reaction "Types":
         # 1. Reaction to the Song -> Like or Dislike <- Kind of hard to measure 
         # Would mean to differentiate between song related and unrelated emotions and also being able to feed the information to a suitable algorithm
         # 2. Reaction unrelated to music -> Success / Focus / Neutral / Sadness / Anger 
         # This means that if in the last 10/5/3 seconds was a lot of anger, we can assume that the user is angry and we can react to that
-        last_emotion = get_emotion_last_xseconds(5, emotion_changes)
-        print(f"Last Emotion: {last_emotion[0]} with {last_emotion[1]}%")
+
         
         # Display results
         cv2.putText(frame, f"{last_emotion}", 
                (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
-    
+        if counter_every > 0:
+            time.sleep(0.1)
+            counter_every -= 0.1
+        else:
+            counter_every = 3
+            # Here is now the Emotion Event section
+            # 3 seconds Happy (>80%) -> OMG-Moment
+            # 3 seconds Sad (>80%) -> Power Music
+            # 3 seconds Angry (>80%) -> Lofi Music
+            last_emotion = get_emotion_last_xseconds(5, emotion_changes)
+            print(f"Last Emotion: {last_emotion[0]} with {last_emotion[1]}%")
+            if last_emotion[0] == 'happy' and last_emotion[1] > 80.0:
+                video_id = youtube_api_search(API_KEY, "Winner Fanfare")
+                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+            elif last_emotion[0] == 'sad' and last_emotion[1] > 80.0:
+                video_id = youtube_api_search(API_KEY, "comforting music")
+                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+            elif last_emotion[0] == 'angry' and last_emotion[1] > 80.0:
+                video_id = youtube_api_search(API_KEY, "Lofi beat")
+                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+            elif last_emotion[0] == 'fear' and last_emotion[1] > 80.0:
+                video_id = youtube_api_search(API_KEY, "GIGA CHAD PHONK")
+                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
         
     except Exception as e:
         print(f"Error: {e}")
