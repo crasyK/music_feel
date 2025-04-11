@@ -13,6 +13,8 @@ emotion_changes = dict({time.time():'neutral'}) # Start time : emotion -> Durati
 global start_time
 start_time = time.time()
 
+last_time = time.time()
+
 def get_emotion_duration(a,b,emotion_changes):
     """
     In an Intervall [a, b] get the amount of all emotions in that timeframe
@@ -42,13 +44,28 @@ def get_emotion_duration(a,b,emotion_changes):
     total_duration = sum(emotion_durations.values())
     if total_duration > 0:
         for emotion in emotion_durations:
+            
+            print((emotion_durations[emotion] / total_duration) * 100)
             emotion_durations[emotion] = (emotion_durations[emotion] / total_duration) * 100
+
     else:
         # If no duration is recorded, set all emotions to 0%
         for emotion in emotion_durations:
             emotion_durations[emotion] = 0.0
     
     return emotion_durations  
+
+def get_emotion_last_xseconds(seconds, emotion_changes):
+    if time.time() - 5  < start_time:
+        last_time = start_time
+    else:
+        last_time = time.time() - 5 
+    # Get the biggest emotion in the last 5 seconds
+    x_sec_distribution = get_emotion_duration(last_time, time.time(),emotion_changes)
+    last_time = time.time()
+    max_emotion = max(x_sec_distribution, key=x_sec_distribution.get)
+    certainty = x_sec_distribution[max_emotion]
+    return max_emotion, certainty
     
 while True:
     ret, frame = cap.read()
@@ -73,10 +90,17 @@ while True:
             emotion_changes.update({time.time():dominant_emotion})
             
         
-        emotion_distribution =  get_emotion_duration(start_time, time.time(),emotion_changes)
+        emotion_distribution_overall =  get_emotion_duration(start_time, time.time(),emotion_changes)   
+        # Two Reaction "Types":
+        # 1. Reaction to the Song -> Like or Dislike <- Kind of hard to measure 
+        # Would mean to differentiate between song related and unrelated emotions and also being able to feed the information to a suitable algorithm
+        # 2. Reaction unrelated to music -> Success / Focus / Neutral / Sadness / Anger 
+        # This means that if in the last 10/5/3 seconds was a lot of anger, we can assume that the user is angry and we can react to that
+        last_emotion = get_emotion_last_xseconds(5, emotion_changes)
+        
         
         # Display results
-        cv2.putText(frame, f"{emotion_distribution}", 
+        cv2.putText(frame, f"{last_emotion}", 
                (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
     
         
