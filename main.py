@@ -1,6 +1,8 @@
 import cv2
 from deepface import DeepFace
 import time
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 
 # Initialize camera
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
