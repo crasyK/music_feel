@@ -25,6 +25,11 @@ API_KEY = os.getenv("YOUTUBE_API_KEY")
 #video_id = youtube_api_search(API_KEY, "Sweet Child O Mine Guns N Roses")
 #webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
 
+# ADD TTS For the extra Spice🔥🔥🔥
+import pyttsx3
+
+engine = pyttsx3.init()
+
 
 # Initialize camera
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
