@@ -44,8 +44,6 @@ def get_emotion_duration(a,b,emotion_changes):
     total_duration = sum(emotion_durations.values())
     if total_duration > 0:
         for emotion in emotion_durations:
-            
-            print((emotion_durations[emotion] / total_duration) * 100)
             emotion_durations[emotion] = (emotion_durations[emotion] / total_duration) * 100
 
     else:
@@ -56,15 +54,17 @@ def get_emotion_duration(a,b,emotion_changes):
     return emotion_durations  
 
 def get_emotion_last_xseconds(seconds, emotion_changes):
-    if time.time() - 5  < start_time:
+    if time.time() - seconds  < start_time:
         last_time = start_time
     else:
-        last_time = time.time() - 5 
+        last_time = time.time() - seconds
     # Get the biggest emotion in the last 5 seconds
     x_sec_distribution = get_emotion_duration(last_time, time.time(),emotion_changes)
     last_time = time.time()
     max_emotion = max(x_sec_distribution, key=x_sec_distribution.get)
     certainty = x_sec_distribution[max_emotion]
+    if certainty < 30.0:
+        return 'none', 0.0
     return max_emotion, certainty
     
 while True:
@@ -97,7 +97,7 @@ while True:
         # 2. Reaction unrelated to music -> Success / Focus / Neutral / Sadness / Anger 
         # This means that if in the last 10/5/3 seconds was a lot of anger, we can assume that the user is angry and we can react to that
         last_emotion = get_emotion_last_xseconds(5, emotion_changes)
-        
+        print(f"Last Emotion: {last_emotion[0]} with {last_emotion[1]}%")
         
         # Display results
         cv2.putText(frame, f"{last_emotion}", 
