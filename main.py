@@ -20,13 +20,34 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=client_id,
     client_secret=client_secret,
     redirect_uri=redirect_uri,
-    scope="user-library-read"
+    scope="user-library-read,user-modify-playback-state,user-read-playback-state,user-read-currently-playing"
 ))
 
-results = sp.current_user_saved_tracks()
-for idx, item in enumerate(results['items']):
-    track = item['track']
-    print(f"{idx + 1}. {track['name']} - {track['artists'][0]['name']}")
+def search_and_play_track(track_name, artist_name=None):
+    query = f"track:{track_name}"
+    if artist_name:
+        query += f" artist:{artist_name}"
+    
+    results = sp.search(q=query, type="track", limit=1)
+    
+    if not results['tracks']['items']:
+        print("No tracks found")
+        return
+    
+    track_uri = results['tracks']['items'][0]['uri']
+    
+    # Get available devices
+    devices = sp.devices()
+    if not devices['devices']:
+        print("No active devices found. Please open Spotify on one of your devices.")
+        return
+    
+    # Play the track on the first available device
+    sp.start_playback(device_id=devices['devices'][0]['id'], uris=[track_uri])
+    print(f"Now playing: {results['tracks']['items'][0]['name']}")
+
+
+search_and_play_track("Fanfare to Success")
 
 # Initialize camera
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
