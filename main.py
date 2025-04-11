@@ -4,6 +4,30 @@ import time
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve Spotify credentials from environment variables
+client_id = os.getenv("SPOTIFY_CLIENT_ID")
+client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI")
+
+# Spotify API stuff
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+    client_id=client_id,
+    client_secret=client_secret,
+    redirect_uri=redirect_uri,
+    scope="user-library-read"
+))
+
+results = sp.current_user_saved_tracks()
+for idx, item in enumerate(results['items']):
+    track = item['track']
+    print(f"{idx + 1}. {track['name']} - {track['artists'][0]['name']}")
+
 # Initialize camera
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
 
@@ -90,8 +114,6 @@ while True:
         if dominant_emotion != last_emotion:
                 # Record the time of the change
             emotion_changes.update({time.time():dominant_emotion})
-            
-        
         emotion_distribution_overall =  get_emotion_duration(start_time, time.time(),emotion_changes)   
         # Two Reaction "Types":
         # 1. Reaction to the Song -> Like or Dislike <- Kind of hard to measure 
