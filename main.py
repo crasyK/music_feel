@@ -46,6 +46,7 @@ last_time = time.time()
 
 counter_every = 3
 last_emotion = 'neutral'
+current_song = 'none'
 
 def get_emotion_duration(a,b,emotion_changes):
     """
@@ -144,16 +145,27 @@ while True:
             # 3 seconds Angry (>80%) -> Lofi Music
             last_emotion = get_emotion_last_xseconds(5, emotion_changes)
             print(f"Last Emotion: {last_emotion[0]} with {last_emotion[1]}%")
-            if last_emotion[0] == 'happy' and last_emotion[1] > 80.0:
+            if last_emotion[0] == 'happy' and last_emotion[1] > 40.0 and current_song != 'happy':
+                current_song = 'happy'
+                engine.say("Detected an OMG moment! Play the trumpets!")
+                engine.runAndWait()
                 video_id = youtube_api_search(API_KEY, "Winner Fanfare")
                 webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
-            elif last_emotion[0] == 'sad' and last_emotion[1] > 80.0:
-                video_id = youtube_api_search(API_KEY, "comforting music")
+            elif last_emotion[0] == 'sad' and last_emotion[1] > 80.0 and current_song != 'sad':
+                current_song = 'sad'
+                engine.say("Detected a sad moment! Initiating Power Music!")
+                engine.runAndWait()
+                video_id = youtube_api_search(API_KEY, "power music")
                 webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
-            elif last_emotion[0] == 'angry' and last_emotion[1] > 80.0:
+            elif last_emotion[0] == 'angry' and last_emotion[1] > 80.0 and current_song != 'angry':
+                current_song = 'angry'
+                engine.say("Detected an angry moment! Initiating Lofi Music!")
+                engine.runAndWait()
                 video_id = youtube_api_search(API_KEY, "Lofi beat")
                 webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
-            elif last_emotion[0] == 'fear' and last_emotion[1] > 80.0:
+            elif last_emotion[0] == 'fear' and last_emotion[1] > 80.0 and current_song != 'fear':
+                engine.say("Detected fear of code moment! Initiating giga chad Mindset!")
+                engine.runAndWait()
                 video_id = youtube_api_search(API_KEY, "GIGA CHAD PHONK")
                 webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
         
