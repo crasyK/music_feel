@@ -1,0 +1,8 @@
+opencv-python
+deepface
+pyttsx3
+sclib
+requests
+sounddevice
+soundfile
+numpy
