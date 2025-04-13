@@ -1,40 +1,16 @@
 import cv2
 from deepface import DeepFace
 import time
-import webbrowser
-
-from dotenv import load_dotenv
-from googleapiclient.discovery import build
-import webbrowser
-import os
-
-def youtube_api_search(api_key, query):
-    youtube = build('youtube', 'v3', developerKey=api_key)
-    request = youtube.search().list(q=query, part='id,snippet', maxResults=1)
-    response = request.execute()
-    return response['items'][0]['id']['videoId']
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Usage
-# Load your YouTube API key from .env file
-API_KEY = os.getenv("YOUTUBE_API_KEY")
-
-# Example usage of the youtube_api function
-#video_id = youtube_api_search(API_KEY, "Sweet Child O Mine Guns N Roses")
-#webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
-
-# ADD TTS For the extra Spice🔥🔥🔥
 import pyttsx3
 
-engine = pyttsx3.init()
+from func_lib.emotion import get_emotion_duration, get_emotion_last_xseconds
+from func_lib.music import SoundCloudPlayer
 
+# Load TTS engine
+engine = pyttsx3.init()
 
 # Initialize camera
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
-
-emotions = ['happy', 'sad', 'angry','neutral', 'surprise', 'fear', 'disgust']
 
 # Dictionary to store emotion changes with timestamps
 emotion_changes = dict({time.time():'neutral'}) # Start time : emotion -> Duration is start time [a] - start time [a+1]
@@ -48,58 +24,14 @@ counter_every = 3
 last_emotion = 'neutral'
 current_song = 'none'
 
-def get_emotion_duration(a,b,emotion_changes):
-    """
-    In an Intervall [a, b] get the amount of all emotions in that timeframe
-    """
-    # Get the keys (timestamps) from the dictionary
-    timestamps = list(emotion_changes.keys())
-    
-    # Find the indices of the start and end timestamps
-    start_index = max(0, next((i for i, t in enumerate(timestamps) if t >= a), len(timestamps) - 1))
-    end_index = min(len(timestamps) - 1, next((i for i, t in enumerate(timestamps) if t >= b), len(timestamps) - 1))
-    
-    # Initialize a dictionary to store the duration of each emotion
-    emotion_durations = {emotion: 0 for emotion in emotions}
-    sliced_dict = {k: emotion_changes[k] for k in timestamps[start_index:end_index]}
 
-    # Iterate through the sliced dictionary to calculate durations
-    for i, (timestamp, emotion) in enumerate(sliced_dict.items()):
-        if i < len(sliced_dict) - 1:
-            next_timestamp = list(sliced_dict.keys())[i + 1]
-        else:
-            next_timestamp = b  # Use the end of the interval for the last entry
 
-        # Add the duration for the current emotion
-        emotion_durations[emotion] += next_timestamp - timestamp
-        
-    # Normalize the durations to get the percentage of time spent on each emotion
-    total_duration = sum(emotion_durations.values())
-    if total_duration > 0:
-        for emotion in emotion_durations:
-            emotion_durations[emotion] = (emotion_durations[emotion] / total_duration) * 100
+player = SoundCloudPlayer()
+playlist_url = "https://soundcloud.com/dnballstars/sets/future-releases" #replace with your playlist url
+#playlist_url = input("Please enter the SoundCloud playlist URL: ")
+player = SoundCloudPlayer()
+player.start_playlist(playlist_url)
 
-    else:
-        # If no duration is recorded, set all emotions to 0%
-        for emotion in emotion_durations:
-            emotion_durations[emotion] = 0.0
-    
-    return emotion_durations  
-
-def get_emotion_last_xseconds(seconds, emotion_changes):
-    if time.time() - seconds  < start_time:
-        last_time = start_time
-    else:
-        last_time = time.time() - seconds
-    # Get the biggest emotion in the last 5 seconds
-    x_sec_distribution = get_emotion_duration(last_time, time.time(),emotion_changes)
-    last_time = time.time()
-    max_emotion = max(x_sec_distribution, key=x_sec_distribution.get)
-    certainty = x_sec_distribution[max_emotion]
-    if certainty < 30.0:
-        return 'none', 0.0
-    return max_emotion, certainty
-    
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -129,7 +61,8 @@ while True:
         # Would mean to differentiate between song related and unrelated emotions and also being able to feed the information to a suitable algorithm
         # 2. Reaction unrelated to music -> Success / Focus / Neutral / Sadness / Anger 
         # This means that if in the last 10/5/3 seconds was a lot of anger, we can assume that the user is angry and we can react to that
-
+        
+        # Reaction type 2. is here implemented and is the main focus of this project
         
         # Display results
         cv2.putText(frame, f"{last_emotion}", 
@@ -143,38 +76,33 @@ while True:
             # 3 seconds Happy (>80%) -> OMG-Moment
             # 3 seconds Sad (>80%) -> Power Music
             # 3 seconds Angry (>80%) -> Lofi Music
-            last_emotion = get_emotion_last_xseconds(5, emotion_changes)
+            last_emotion = get_emotion_last_xseconds(5, emotion_changes, start_time)
             print(f"Last Emotion: {last_emotion[0]} with {last_emotion[1]}%")
             if last_emotion[0] == 'happy' and last_emotion[1] > 40.0 and current_song != 'happy':
                 current_song = 'happy'
                 engine.say("Detected an OMG moment! Play the trumpets!")
                 engine.runAndWait()
-                video_id = youtube_api_search(API_KEY, "Winner Fanfare")
-                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+                player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
             elif last_emotion[0] == 'sad' and last_emotion[1] > 80.0 and current_song != 'sad':
                 current_song = 'sad'
                 engine.say("Detected a sad moment! Initiating Power Music!")
                 engine.runAndWait()
-                video_id = youtube_api_search(API_KEY, "power music")
-                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+                player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
             elif last_emotion[0] == 'angry' and last_emotion[1] > 80.0 and current_song != 'angry':
                 current_song = 'angry'
                 engine.say("Detected an angry moment! Initiating Lofi Music!")
                 engine.runAndWait()
-                video_id = youtube_api_search(API_KEY, "Lofi beat")
-                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
+                player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
             elif last_emotion[0] == 'fear' and last_emotion[1] > 80.0 and current_song != 'fear':
+                current_song = 'fear'
                 engine.say("Detected fear of code moment! Initiating giga chad Mindset!")
                 engine.runAndWait()
-                video_id = youtube_api_search(API_KEY, "GIGA CHAD PHONK")
-                webbrowser.open(f"https://www.youtube.com/watch?v={video_id}&autoplay=1")
-        
+                player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
+    
     except Exception as e:
         print(f"Error: {e}")
-    
     # Show live feed
     cv2.imshow("Emotion Recognition", frame)
-    
     # Exit on 'q' key
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
