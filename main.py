@@ -82,24 +82,28 @@ while True:
                 print("Detected an OMG moment! Play the trumpets!")
                 engine.say("Detected an OMG moment! Play the trumpets!")
                 engine.runAndWait()
+                player.resume()
                 player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
             elif last_emotion[0] == 'sad' and last_emotion[1] > 80.0 and current_song != 'sad':
                 current_song = 'sad'
                 player.pause()
                 engine.say("Detected a sadness intensivies moment! Initiating Happy Music!")
                 engine.runAndWait()
+                player.resume()
                 player.interrupt("https://soundcloud.com/briona-alex/macarena-bass-boosted-remix") 
             elif last_emotion[0] == 'angry' and last_emotion[1] > 80.0 and current_song != 'angry':
                 current_song = 'angry'
                 player.pause()
                 engine.say("Detected an rage quit! Initiating Lofi Music!")
                 engine.runAndWait()
+                player.resume()
                 player.interrupt("https://soundcloud.com/nymano/solitude?in=user-636346752/sets/lofi-chill") 
             elif last_emotion[0] == 'fear' and last_emotion[1] > 80.0 and current_song != 'fear':
                 current_song = 'fear'
                 player.pause()
                 engine.say("Detected the fear of coding! Initiating giga chad Mindset!")
                 engine.runAndWait()
+                player.resume()
                 player.interrupt("https://soundcloud.com/kashkachefira/eternxlkz-slay-chashkakefira-remake?in=kuhar-ilya/sets/phonk-music-2024-best") 
     
     except Exception as e:
