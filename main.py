@@ -25,8 +25,7 @@ last_emotion = 'neutral'
 current_song = 'none'
 
 player = SoundCloudPlayer()
-playlist_url = "https://soundcloud.com/sc-playlists-de/sets/techno-machinista" 
-#playlist_url = input("Please enter the SoundCloud playlist URL: ")
+playlist_url = input("Please enter the SoundCloud playlist URL: ") # https://soundcloud.com/sc-playlists-de/sets/techno-machinista
 
 player = SoundCloudPlayer()
 player.start_playlist(playlist_url)
