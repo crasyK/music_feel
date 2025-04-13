@@ -24,11 +24,10 @@ counter_every = 3
 last_emotion = 'neutral'
 current_song = 'none'
 
-
-
 player = SoundCloudPlayer()
-playlist_url = "https://soundcloud.com/dnballstars/sets/future-releases" #replace with your playlist url
+playlist_url = "https://soundcloud.com/sc-playlists-de/sets/techno-machinista" 
 #playlist_url = input("Please enter the SoundCloud playlist URL: ")
+
 player = SoundCloudPlayer()
 player.start_playlist(playlist_url)
 
@@ -80,24 +79,29 @@ while True:
             print(f"Last Emotion: {last_emotion[0]} with {last_emotion[1]}%")
             if last_emotion[0] == 'happy' and last_emotion[1] > 40.0 and current_song != 'happy':
                 current_song = 'happy'
+                player.pause()
+                print("Detected an OMG moment! Play the trumpets!")
                 engine.say("Detected an OMG moment! Play the trumpets!")
                 engine.runAndWait()
                 player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
             elif last_emotion[0] == 'sad' and last_emotion[1] > 80.0 and current_song != 'sad':
                 current_song = 'sad'
-                engine.say("Detected a sad moment! Initiating Power Music!")
+                player.pause()
+                engine.say("Detected a sadness intensivies moment! Initiating Happy Music!")
                 engine.runAndWait()
-                player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
+                player.interrupt("https://soundcloud.com/briona-alex/macarena-bass-boosted-remix") 
             elif last_emotion[0] == 'angry' and last_emotion[1] > 80.0 and current_song != 'angry':
                 current_song = 'angry'
-                engine.say("Detected an angry moment! Initiating Lofi Music!")
+                player.pause()
+                engine.say("Detected an rage quit! Initiating Lofi Music!")
                 engine.runAndWait()
-                player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
+                player.interrupt("https://soundcloud.com/nymano/solitude?in=user-636346752/sets/lofi-chill") 
             elif last_emotion[0] == 'fear' and last_emotion[1] > 80.0 and current_song != 'fear':
                 current_song = 'fear'
-                engine.say("Detected fear of code moment! Initiating giga chad Mindset!")
+                player.pause()
+                engine.say("Detected the fear of coding! Initiating giga chad Mindset!")
                 engine.runAndWait()
-                player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") 
+                player.interrupt("https://soundcloud.com/kashkachefira/eternxlkz-slay-chashkakefira-remake?in=kuhar-ilya/sets/phonk-music-2024-best") 
     
     except Exception as e:
         print(f"Error: {e}")

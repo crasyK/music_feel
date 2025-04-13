@@ -12,9 +12,11 @@ class SoundCloudPlayer:
         self.playlist = None
         self.current_track_index = 0
         self.is_playing = False
+        self.is_paused = False  
         self.is_interrupted = False
         self.interrupt_track_url = None
         self.lock = threading.Lock()
+        self.pause_event = threading.Event() 
 
     def play_track(self, track):
         try:
@@ -75,12 +77,10 @@ class SoundCloudPlayer:
     def stop(self):
         with self.lock:
             self.is_playing = False
-        sd.stop()
-
-# Example usage
-player = SoundCloudPlayer()
-playlist_url = "https://soundcloud.com/dnballstars/sets/future-releases" #replace with your playlist url
-player.start_playlist(playlist_url)
-time.sleep(10) #play for ten seconds.
-print("Interrupting...")
-player.interrupt("https://soundcloud.com/manny-fernandez-4856421/trumpet-fanfare-2") #replace with your interrupt song.
+        sd.stop() #replace with your interrupt song.
+        
+    def pause(self):
+        with self.lock:
+            self.is_paused = True
+        sd.stop() #stop playing the current sound.
+        time.sleep(3) #wait for the sound to stop.
