@@ -1,8 +1,9 @@
 opencv-python
 deepface
 pyttsx3
-sclib
+soundcloud-lib
 requests
 sounddevice
 soundfile
 numpy
+tf-keras
